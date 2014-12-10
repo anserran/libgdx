@@ -611,12 +611,7 @@ public interface GL30 extends GL20 {
 
 // // C function GLvoid * glMapBufferRange ( GLenum target, GLintptr offset, GLsizeiptr length, GLbitfield access )
 //
-// public java.nio.Buffer glMapBufferRange(
-// int target,
-// int offset,
-// int length,
-// int access
-// );
+    public java.nio.Buffer glMapBufferRange( int target, int offset, int length, int access );
 
 	// C function void glFlushMappedBufferRange ( GLenum target, GLintptr offset, GLsizeiptr length )
 
@@ -1394,5 +1389,7 @@ public interface GL30 extends GL20 {
 // int bufSize,
 // java.nio.IntBuffer params
 // );
+
+public void glReadPixels(int x, int y, int width, int height, int format, int type, long offset);
 
 }

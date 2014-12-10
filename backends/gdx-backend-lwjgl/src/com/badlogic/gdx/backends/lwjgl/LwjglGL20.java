@@ -16,14 +16,8 @@
 
 package com.badlogic.gdx.backends.lwjgl;
 
-import java.nio.Buffer;
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-import java.nio.DoubleBuffer;
-import java.nio.FloatBuffer;
-import java.nio.IntBuffer;
-import java.nio.ShortBuffer;
-
+import com.badlogic.gdx.graphics.GL30;
+import com.badlogic.gdx.utils.GdxRuntimeException;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.EXTFramebufferObject;
 import org.lwjgl.opengl.GL11;
@@ -32,7 +26,13 @@ import org.lwjgl.opengl.GL14;
 import org.lwjgl.opengl.GL15;
 import org.lwjgl.opengl.GL20;
 
-import com.badlogic.gdx.utils.GdxRuntimeException;
+import java.nio.Buffer;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+import java.nio.DoubleBuffer;
+import java.nio.FloatBuffer;
+import java.nio.IntBuffer;
+import java.nio.ShortBuffer;
 
 /** An implementation of the {@link GL20} interface based on LWJGL. Note that LWJGL shaders and OpenGL ES shaders will not be 100%
  * compatible. Some glGetXXX methods are not implemented.
@@ -531,6 +531,7 @@ class LwjglGL20 implements com.badlogic.gdx.graphics.GL20 {
 	}
 
 	public void glReadPixels (int x, int y, int width, int height, int format, int type, Buffer pixels) {
+        int id = GL11.glGetInteger(GL30.GL_PIXEL_PACK_BUFFER);
 		if (pixels instanceof ByteBuffer)
 			GL11.glReadPixels(x, y, width, height, format, type, (ByteBuffer)pixels);
 		else if (pixels instanceof ShortBuffer)

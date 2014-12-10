@@ -16,15 +16,18 @@
 
 package com.badlogic.gdx.utils;
 
-import java.nio.ByteBuffer;
-
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.GL30;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Pixmap.Format;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.MathUtils;
+
+import java.nio.Buffer;
+import java.nio.ByteBuffer;
+import java.nio.IntBuffer;
 
 /** Class with static helper methods that provide access to the default OpenGL FrameBuffer. These methods can be used to get the
  * entire screen content or a portion thereof.
@@ -68,12 +71,30 @@ public final class ScreenUtils {
 	}
 
 	public static Pixmap getFrameBufferPixmap (int x, int y, int w, int h) {
-		Gdx.gl.glPixelStorei(GL20.GL_PACK_ALIGNMENT, 1);
+        Pixmap pixmap = new Pixmap(w, h, Format.RGBA8888);
+        ByteBuffer pixels = pixmap.getPixels();
 
-		final Pixmap pixmap = new Pixmap(w, h, Format.RGBA8888);
-		ByteBuffer pixels = pixmap.getPixels();
-		Gdx.gl.glReadPixels(x, y, w, h, GL20.GL_RGBA, GL20.GL_UNSIGNED_BYTE, pixels);
+        if (Gdx.graphics.isGL30Available()) {
+            GL30 gl = Gdx.gl30;
+            IntBuffer intBuffer = BufferUtils.newIntBuffer(16);
+            gl.glGenBuffers(1, intBuffer);
+            int pboId = intBuffer.get(0);
+            gl.glBindBuffer(GL30.GL_PIXEL_PACK_BUFFER, pboId);
+            gl.glBufferData(GL30.GL_PIXEL_PACK_BUFFER, pixels.capacity(), pixels, GL30.GL_DYNAMIC_READ);
+            gl.glBindBuffer(GL30.GL_PIXEL_PACK_BUFFER, 0);
 
+            gl.glReadBuffer(GL30.GL_COLOR_ATTACHMENT0);
+            gl.glBindBuffer(GL30.GL_PIXEL_PACK_BUFFER, pboId);
+            IntBuffer offset = BufferUtils.newIntBuffer(1);
+            gl.glReadPixels(x, y, w, h, GL30.GL_RGBA, GL30.GL_UNSIGNED_BYTE, offset);
+            Buffer buffer = gl.glMapBufferRange(GL30.GL_PIXEL_PACK_BUFFER, 0, pixels.capacity(), GL30.GL_MAP_READ_BIT);
+            BufferUtils.copy(buffer, pixels, pixels.capacity());
+            gl.glUnmapBuffer(GL30.GL_PIXEL_PACK_BUFFER);
+            gl.glBindBuffer(GL30.GL_PIXEL_PACK_BUFFER, 0);
+        } else {
+		    Gdx.gl.glPixelStorei(GL20.GL_PACK_ALIGNMENT, 1);
+		    Gdx.gl.glReadPixels(x, y, w, h, GL20.GL_RGBA, GL20.GL_UNSIGNED_BYTE, pixels);
+        }
 		return pixmap;
 	}
 

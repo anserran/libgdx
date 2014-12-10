@@ -16,12 +16,12 @@
 
 package com.badlogic.gdx.graphics.profiling;
 
+import com.badlogic.gdx.graphics.GL30;
+
 import java.nio.Buffer;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.nio.LongBuffer;
-
-import com.badlogic.gdx.graphics.GL30;
 
 /** @author Daniel Holderbaum */
 public class GL30Profiler extends GLProfiler implements GL30 {
@@ -1087,7 +1087,13 @@ public class GL30Profiler extends GLProfiler implements GL30 {
 		gl30.glFramebufferTextureLayer(target, attachment, texture, level, layer);
 	}
 
-	@Override
+    @Override
+    public Buffer glMapBufferRange(int target, int offset, int length, int access) {
+        calls++;
+        return gl30.glMapBufferRange(target, offset, length, access);
+    }
+
+    @Override
 	public void glFlushMappedBufferRange (int target, int offset, int length) {
 		calls++;
 		gl30.glFlushMappedBufferRange(target, offset, length);
@@ -1469,8 +1475,14 @@ public class GL30Profiler extends GLProfiler implements GL30 {
 		calls++;
 		gl30.glInvalidateSubFramebuffer(target, numAttachments, attachments, x, y, width, height);
 	}
-	
-	@Override
+
+    @Override
+    public void glReadPixels(int x, int y, int width, int height, int format, int type, long offset) {
+        calls++;
+        gl30.glReadPixels(x, y, width, height, format, type, offset);
+    }
+
+    @Override
 	public void glDeleteTexture (int texture) {
 		calls++;
 		gl30.glDeleteTexture(texture);
@@ -1533,7 +1545,7 @@ public class GL30Profiler extends GLProfiler implements GL30 {
 	@Override
 	public void glUniform2fv (int location, int count, float[] v, int offset) {
 		calls++;
-		gl30.glUniform2fv(location, count, v, offset);	
+		gl30.glUniform2fv(location, count, v, offset);
 	}
 
 	@Override
